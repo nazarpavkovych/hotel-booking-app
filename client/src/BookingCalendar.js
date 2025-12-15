@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3'; // ВАЖЛИВО: V3 для нових версій
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'; // ПОВЕРНУЛИ СТАНДАРТНИЙ ІМПОРТ
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { Box } from '@mui/material';
 import { format } from 'date-fns';
-import { uk } from 'date-fns/locale'; // ВАЖЛИВО: Новий стиль імпорту мови
+import ukLocale from 'date-fns/locale/uk'; // ПОВЕРНУЛИ СТАНДАРТНИЙ ІМПОРТ МОВИ (для v2)
 
 // Стилі для дня в календарі
 const CustomPickersDay = styled(PickersDay, {
@@ -27,7 +27,6 @@ const CustomPickersDay = styled(PickersDay, {
   }),
 }));
 
-// Стиль ціни під датою
 const PriceTag = styled('div')(({ theme }) => ({
   fontSize: '0.6rem',
   color: theme.palette.secondary.main,
@@ -39,7 +38,7 @@ export default function BookingCalendar({ onDateSelect }) {
   const [value, setValue] = useState(new Date());
 
   useEffect(() => {
-    // Імітуємо дані (або тут може бути запит до API)
+    // Заглушка даних
     setCalendarData({
       '2023-10-27': { price: 1200, available: true },
       '2023-10-28': { price: 1400, available: true },
@@ -67,8 +66,7 @@ export default function BookingCalendar({ onDateSelect }) {
   };
 
   return (
-    // Використовуємо uk з нового імпорту
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={uk}>
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ukLocale}>
       <Box sx={{ 
           bgcolor: '#fff', 
           borderRadius: 2, 
