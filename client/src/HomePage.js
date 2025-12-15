@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { addDays, format } from 'date-fns';
-import api from '../api'; // Ваш налаштований API клієнт
+import api from './api'; // Ваш налаштований API клієнт
 
 // Імпорти компонентів
 import BookingCalendar from './BookingCalendar';

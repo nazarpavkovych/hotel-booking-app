@@ -3,7 +3,7 @@ import {
   Box, Typography, Grid, Button, TextField, Paper, Alert 
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import api from '../api';
+import api from './api';
 // Стилізована кнопка часу (Золота при виборі)
 const TimeSlotButton = styled(Button)(({ theme, selected }) => ({
   width: '100%',
