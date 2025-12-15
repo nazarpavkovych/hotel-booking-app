@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'; // ПОВЕРНУЛИ СТАНДАРТНИЙ ІМПОРТ
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; // <-- Використовуємо Day.js адаптер
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { Box } from '@mui/material';
-import { format } from 'date-fns';
-import ukLocale from 'date-fns/locale/uk'; // ПОВЕРНУЛИ СТАНДАРТНИЙ ІМПОРТ МОВИ (для v2)
+import dayjs from 'dayjs'; // <-- Імпорт самої бібліотеки
+import 'dayjs/locale/uk'; // <-- Імпорт української локалізації
 
 // Стилі для дня в календарі
 const CustomPickersDay = styled(PickersDay, {
@@ -16,7 +16,6 @@ const CustomPickersDay = styled(PickersDay, {
     // Якщо вільно - звичайний вигляд
   }),
   ...(!dayData?.available && dayData !== undefined && {
-    // Якщо зайнято - закреслено і сіре
     textDecoration: 'line-through',
     color: theme.palette.text.disabled,
     pointerEvents: 'none',
@@ -35,7 +34,7 @@ const PriceTag = styled('div')(({ theme }) => ({
 
 export default function BookingCalendar({ onDateSelect }) {
   const [calendarData, setCalendarData] = useState({});
-  const [value, setValue] = useState(new Date());
+  const [value, setValue] = useState(dayjs()); // <-- dayjs() замість new Date()
 
   useEffect(() => {
     // Заглушка даних
@@ -47,7 +46,8 @@ export default function BookingCalendar({ onDateSelect }) {
   }, []);
 
   const renderDay = (day, _value, DayComponentProps) => {
-    const dateKey = format(day, 'yyyy-MM-dd');
+    // Day.js об'єкт форматується так:
+    const dateKey = day.format('YYYY-MM-DD');
     const data = calendarData[dateKey];
 
     return (
@@ -66,7 +66,8 @@ export default function BookingCalendar({ onDateSelect }) {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ukLocale}>
+    // adapterLocale передається як рядок "uk"
+    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="uk">
       <Box sx={{ 
           bgcolor: '#fff', 
           borderRadius: 2, 
@@ -78,7 +79,7 @@ export default function BookingCalendar({ onDateSelect }) {
           value={value}
           onChange={(newValue) => {
             setValue(newValue);
-            onDateSelect(newValue);
+            onDateSelect(newValue); // Передаємо об'єкт dayjs батьківському компоненту
           }}
           slots={{
             day: renderDay,

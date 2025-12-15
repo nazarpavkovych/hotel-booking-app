@@ -3,16 +3,15 @@ import {
   Box, Container, Typography, Button, Grid, CircularProgress, Alert 
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { addDays, format } from 'date-fns';
-import api from './api'; // Ваш налаштований API клієнт
+import dayjs from 'dayjs'; // <-- Новий імпорт
+import api from './api';
 
-// Імпорти компонентів
+// Компоненти
 import BookingCalendar from './BookingCalendar';
 import RoomCard from './RoomCard';
 import BookingModal from './BookingModal';
 import PoolIcon from '@mui/icons-material/Pool';
 
-// --- СТИЛІ ---
 const HeroSection = styled(Box)(({ theme }) => ({
   height: '80vh',
   backgroundImage: 'linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.7)), url(https://source.unsplash.com/random?luxury-hotel)',
@@ -37,49 +36,39 @@ const SectionTitle = ({ children, dark }) => (
 );
 
 const HomePage = () => {
-  // --- STATE ---
   const roomsSectionRef = useRef(null);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [error, setError] = useState(null);
 
-  // Стан для Модального вікна
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRoomForBooking, setSelectedRoomForBooking] = useState(null);
 
-  // Початкове завантаження (можна залишити порожнім або завантажити "типи номерів" для краси)
   useEffect(() => {
-    // Тут ми поки залишимо статичні дані для першого вигляду, 
-    // або можемо зробити запит на всі номери, якщо такий є.
-    // Поки що залишимо, щоб сторінка не була пустою до вибору дати.
     setRooms([
       { id: 1, name: 'Стандарт', price: 1200, description: 'Оберіть дату щоб перевірити доступність', imageUrl: '' },
       { id: 2, name: 'Люкс', price: 2500, description: 'Оберіть дату щоб перевірити доступність', imageUrl: '' },
     ]);
   }, []);
 
-  // --- 1. ЛОГІКА ПОШУКУ НОМЕРІВ ---
-  const handleDateSelect = async (date) => {
-    // Форматуємо дати для сервера (YYYY-MM-DD)
-    const checkIn = format(date, 'yyyy-MM-dd');
-    const checkOut = format(addDays(date, 1), 'yyyy-MM-dd'); // Стандарт: 1 ніч
+  // --- ЛОГІКА DAY.JS ---
+  const handleDateSelect = async (dateObject) => {
+    // dateObject - це тепер об'єкт dayjs
+    const checkIn = dateObject.format('YYYY-MM-DD');
+    const checkOut = dateObject.add(1, 'day').format('YYYY-MM-DD'); // Додаємо 1 день
     
     setSelectedDate(checkIn);
     setLoading(true);
     setError(null);
 
-    // Плавний скрол до секції
     roomsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     try {
-      // РЕАЛЬНИЙ ЗАПИТ НА СЕРВЕР
-      // api.js сам підставить адресу Render
       const res = await api.get('/api/check-availability', { 
         params: { checkIn, checkOut }
       });
 
-      // Сервер повертає масив вільних номерів
       setRooms(res.data);
       setLoading(false);
       
@@ -94,7 +83,6 @@ const HomePage = () => {
     }
   };
 
-  // --- 2. ВІДКРИТТЯ МОДАЛКИ ---
   const openBookingModal = (room) => {
     if (!selectedDate) {
       alert("Будь ласка, спочатку оберіть дату в календарі!");
@@ -104,11 +92,8 @@ const HomePage = () => {
     setModalOpen(true);
   };
 
-  // --- 3. ВІДПРАВКА БРОНЮВАННЯ ---
   const handleBookingSubmit = async (guestData) => {
-    // guestData приходить з модалки: { name: '...', phone: '...' }
-    
-    const checkOut = format(addDays(new Date(selectedDate), 1), 'yyyy-MM-dd');
+    const checkOut = dayjs(selectedDate).add(1, 'day').format('YYYY-MM-DD');
 
     const bookingPayload = {
       roomId: selectedRoomForBooking.id,
@@ -119,18 +104,15 @@ const HomePage = () => {
     };
 
     try {
-      // РЕАЛЬНИЙ ЗАПИТ НА СТВОРЕННЯ БРОНІ
       await api.post('/api/book', bookingPayload);
       
       alert(`Успішно! Номер ${selectedRoomForBooking.name} заброньовано на ${selectedDate}.`);
       setModalOpen(false);
-      
-      // Оновлюємо список номерів (прибираємо заброньований)
-      handleDateSelect(new Date(selectedDate));
+      handleDateSelect(dayjs(selectedDate));
       
     } catch (err) {
       console.error(err);
-      alert("Помилка бронювання. Можливо, хтось встиг забронювати раніше.");
+      alert("Помилка бронювання.");
     }
   };
 
@@ -149,7 +131,6 @@ const HomePage = () => {
         </Button>
       </HeroSection>
 
-      {/* --- CALENDAR SECTION --- */}
       <Box sx={{ bgcolor: 'primary.main', py: 8 }}>
         <Container maxWidth="lg">
           <SectionTitle>Перевірити дати</SectionTitle>
@@ -159,7 +140,7 @@ const HomePage = () => {
                  Оберіть дату заїзду
               </Typography>
               <Typography color="grey.400">
-                Миттєве підтвердження наявності місць. Система автоматично перевіряє вільні номери в реальному часі.
+                Миттєве підтвердження наявності місць. Система автоматично перевіряє вільні номери.
               </Typography>
             </Grid>
             <Grid item xs={12} md={7}>
@@ -169,7 +150,6 @@ const HomePage = () => {
         </Container>
       </Box>
 
-      {/* --- ROOMS SECTION --- */}
       <Container sx={{ py: 8, minHeight: '500px' }} ref={roomsSectionRef}>
         <SectionTitle dark>
             {selectedDate ? `Номери на ${selectedDate}` : 'Наші Номери'}
@@ -191,7 +171,6 @@ const HomePage = () => {
           </Grid>
         )}
         
-        {/* Підказка, якщо кімнати є, але це просто заглушки */}
         {!selectedDate && !loading && (
              <Box textAlign="center" mt={4} color="text.secondary">
                  <Typography variant="caption">Оберіть дату вище, щоб побачити актуальні ціни та доступність.</Typography>
@@ -199,7 +178,6 @@ const HomePage = () => {
         )}
       </Container>
 
-      {/* --- SAUNA TEASER --- */}
       <Box sx={{ bgcolor: '#050d1a', py: 8, color: 'white', textAlign: 'center' }}>
          <Container>
             <PoolIcon sx={{ fontSize: 60, color: '#D4AF37', mb: 2 }} />
@@ -213,7 +191,6 @@ const HomePage = () => {
          </Container>
       </Box>
 
-      {/* --- MODAL --- */}
       <BookingModal 
         open={modalOpen} 
         handleClose={() => setModalOpen(false)} 
