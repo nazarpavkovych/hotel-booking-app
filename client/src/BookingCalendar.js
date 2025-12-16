@@ -6,7 +6,10 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { Box } from '@mui/material';
 import dayjs from 'dayjs';
+
+// --- ВАЖЛИВО: Імпорт та активація мови ---
 import 'dayjs/locale/uk';
+dayjs.locale('uk'); // Встановлюємо українську глобально
 
 // Стилі
 const CustomPickersDay = styled(PickersDay, {
@@ -32,6 +35,7 @@ const PriceTag = styled('div')(({ theme }) => ({
 
 export default function BookingCalendar({ onDateSelect }) {
   const [calendarData, setCalendarData] = useState({});
+  // Використовуємо dayjs() для початкового значення
   const [value, setValue] = useState(dayjs());
 
   useEffect(() => {
@@ -44,9 +48,8 @@ export default function BookingCalendar({ onDateSelect }) {
   }, []);
 
   const renderDay = (day, _value, DayComponentProps) => {
-    // --- ВИПРАВЛЕННЯ ТУТ ---
-    // Ми страхуємося: dayjs(day) перетворить будь-що у правильний формат
-    const dateKey = dayjs(day).format('YYYY-MM-DD');
+    // day - це об'єкт dayjs
+    const dateKey = day.format('YYYY-MM-DD');
     const data = calendarData[dateKey];
 
     return (
@@ -65,7 +68,8 @@ export default function BookingCalendar({ onDateSelect }) {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="uk">
+    // Прибрали adapterLocale="uk", бо ми вже задали dayjs.locale('uk') вище
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ 
           bgcolor: '#fff', 
           borderRadius: 2, 
