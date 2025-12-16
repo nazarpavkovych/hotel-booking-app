@@ -6,16 +6,12 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import { PickersDay } from '@mui/x-date-pickers/PickersDay';
 import { Box } from '@mui/material';
 import dayjs from 'dayjs';
+// Тут більше не треба імпортувати локаль, вона вже є в index.js
 
-// --- ВАЖЛИВО: Імпорт та активація мови ---
-import 'dayjs/locale/uk';
-dayjs.locale('uk'); // Встановлюємо українську глобально
-
-// Стилі
 const CustomPickersDay = styled(PickersDay, {
   shouldForwardProp: (prop) => prop !== 'dayData',
 })(({ theme, dayData, selected }) => ({
-  ...(dayData?.available && { /* Вільно */ }),
+  ...(dayData?.available && { /* ... */ }),
   ...(!dayData?.available && dayData !== undefined && {
     textDecoration: 'line-through',
     color: theme.palette.text.disabled,
@@ -35,11 +31,9 @@ const PriceTag = styled('div')(({ theme }) => ({
 
 export default function BookingCalendar({ onDateSelect }) {
   const [calendarData, setCalendarData] = useState({});
-  // Використовуємо dayjs() для початкового значення
   const [value, setValue] = useState(dayjs());
 
   useEffect(() => {
-    // Заглушка даних
     setCalendarData({
       '2023-10-27': { price: 1200, available: true },
       '2023-10-28': { price: 1400, available: true },
@@ -48,16 +42,12 @@ export default function BookingCalendar({ onDateSelect }) {
   }, []);
 
   const renderDay = (day, _value, DayComponentProps) => {
-    // day - це об'єкт dayjs
     const dateKey = day.format('YYYY-MM-DD');
     const data = calendarData[dateKey];
 
     return (
       <Box key={day.toString()} sx={{ position: 'relative' }}>
-        <CustomPickersDay
-          {...DayComponentProps}
-          dayData={data}
-        />
+        <CustomPickersDay {...DayComponentProps} dayData={data} />
         {data?.available && (
           <Box sx={{ position: 'absolute', bottom: 5, left: 0, right: 0, textAlign: 'center' }}>
             <PriceTag>{data.price}₴</PriceTag>
@@ -68,14 +58,9 @@ export default function BookingCalendar({ onDateSelect }) {
   };
 
   return (
-    // Прибрали adapterLocale="uk", бо ми вже задали dayjs.locale('uk') вище
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ 
-          bgcolor: '#fff', 
-          borderRadius: 2, 
-          p: 2, 
-          boxShadow: 3,
-          border: '1px solid #D4AF37'
+          bgcolor: '#fff', borderRadius: 2, p: 2, boxShadow: 3, border: '1px solid #D4AF37'
       }}>
         <DateCalendar
           value={value}

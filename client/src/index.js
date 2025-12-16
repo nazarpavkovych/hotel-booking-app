@@ -1,7 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
+
+// Налаштування Day.js
+import dayjs from 'dayjs';
+import 'dayjs/locale/uk';
+dayjs.locale('uk');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
