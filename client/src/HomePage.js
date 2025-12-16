@@ -3,10 +3,9 @@ import {
   Box, Container, Typography, Button, Grid, CircularProgress, Alert 
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import dayjs from 'dayjs'; // <-- Новий імпорт
+import dayjs from 'dayjs'; 
 import api from './api';
 
-// Компоненти
 import BookingCalendar from './BookingCalendar';
 import RoomCard from './RoomCard';
 import BookingModal from './BookingModal';
@@ -52,11 +51,13 @@ const HomePage = () => {
     ]);
   }, []);
 
-  // --- ЛОГІКА DAY.JS ---
-  const handleDateSelect = async (dateObject) => {
-    // dateObject - це тепер об'єкт dayjs
+  // --- ВИПРАВЛЕННЯ ТУТ ---
+  const handleDateSelect = async (rawDate) => {
+    // Обгортаємо вхідну дату в dayjs(), щоб точно мати правильний об'єкт
+    const dateObject = dayjs(rawDate);
+    
     const checkIn = dateObject.format('YYYY-MM-DD');
-    const checkOut = dateObject.add(1, 'day').format('YYYY-MM-DD'); // Додаємо 1 день
+    const checkOut = dateObject.add(1, 'day').format('YYYY-MM-DD');
     
     setSelectedDate(checkIn);
     setLoading(true);
@@ -68,17 +69,15 @@ const HomePage = () => {
       const res = await api.get('/api/check-availability', { 
         params: { checkIn, checkOut }
       });
-
       setRooms(res.data);
       setLoading(false);
       
       if (res.data.length === 0) {
         setError("На жаль, на цю дату вільних місць немає.");
       }
-
     } catch (err) {
       console.error(err);
-      setError("Не вдалося з'єднатися з сервером. Спробуйте пізніше.");
+      setError("Не вдалося з'єднатися з сервером.");
       setLoading(false);
     }
   };
@@ -105,11 +104,9 @@ const HomePage = () => {
 
     try {
       await api.post('/api/book', bookingPayload);
-      
-      alert(`Успішно! Номер ${selectedRoomForBooking.name} заброньовано на ${selectedDate}.`);
+      alert(`Успішно! Номер ${selectedRoomForBooking.name} заброньовано.`);
       setModalOpen(false);
       handleDateSelect(dayjs(selectedDate));
-      
     } catch (err) {
       console.error(err);
       alert("Помилка бронювання.");
@@ -123,7 +120,7 @@ const HomePage = () => {
           GOLDEN STAY
         </Typography>
         <Typography variant="h6" sx={{ mb: 4, maxWidth: '600px', fontWeight: 300 }}>
-           12 ексклюзивних номерів для вашого спокою
+           12 ексклюзивних номерів
         </Typography>
         <Button variant="contained" color="secondary" size="large" 
             onClick={() => roomsSectionRef.current?.scrollIntoView({ behavior: 'smooth' })}>
@@ -140,7 +137,7 @@ const HomePage = () => {
                  Оберіть дату заїзду
               </Typography>
               <Typography color="grey.400">
-                Миттєве підтвердження наявності місць. Система автоматично перевіряє вільні номери.
+                Система автоматично перевіряє вільні номери.
               </Typography>
             </Grid>
             <Grid item xs={12} md={7}>
@@ -173,7 +170,7 @@ const HomePage = () => {
         
         {!selectedDate && !loading && (
              <Box textAlign="center" mt={4} color="text.secondary">
-                 <Typography variant="caption">Оберіть дату вище, щоб побачити актуальні ціни та доступність.</Typography>
+                 <Typography variant="caption">Оберіть дату вище.</Typography>
              </Box>
         )}
       </Container>
@@ -182,9 +179,6 @@ const HomePage = () => {
          <Container>
             <PoolIcon sx={{ fontSize: 60, color: '#D4AF37', mb: 2 }} />
             <Typography variant="h4" color="secondary" gutterBottom>Фінська Сауна</Typography>
-            <Typography paragraph color="grey.500" sx={{ maxWidth: 600, mx: 'auto' }}>
-               Приватний відпочинок доступний для бронювання окремо.
-            </Typography>
             <Button variant="outlined" color="secondary" href="/sauna">
                Забронювати час
             </Button>
