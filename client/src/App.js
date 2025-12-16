@@ -1,13 +1,13 @@
 import React from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
-import theme from './theme';
-import HomePage from './HomePage';
+import theme from './theme';     // Ваша тема
+import HomePage from './HomePage'; // Ваш основний компонент
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <HomePage />
+      <CssBaseline /> {/* Скидання стандартних відступів браузера */}
+      <HomePage />    {/* Відображення всього сайту */}
     </ThemeProvider>
   );
 }
